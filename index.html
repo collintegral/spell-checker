@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Favorite Spells</title>
+  <style type="text/css">
+    button,
+    div,
+    form,
+    input {
+      margin: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Movie Search</h1>
+
+    <!-- Spells will get dumped here -->
+    <div id="buttons-view"></div>
+
+    <form id="spell-form">
+      <label for="spell-input">Add a Spell Button</label>
+      <input type="text" id="spell-input"><br>
+
+      <!-- Button triggers new spell to be added -->
+      <input id="add-spell" type="submit" value="Add a Spell Button">
+    </form>
+    <div id="current-spell"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+      var sampleSpells = ["Acid Arrow", "Heat Metal", "Magic Missile", "Prestidigitation"];
+      var buttonsArr = []
+      var spellInput = $("#spell-input");
+      var buttonsView = $("#buttons-view");
+      var currentSpell = $("#current-spell");
+      var proxyURL = "https://cors-anywhere.herokuapp.com/";
+      
+        
+        var spellName = $("<p>");
+        var spellLevel = $("<p>");
+        var spellSchool = $("<p>");
+        var spellTime = $("<p>");
+        var spellRange = $("<p>");
+        var spellComp = $("<p>");
+        var spellConc = $("<p>");
+        var spellDesc = $("<p>");
+        var entryInfo = [spellName, spellLevel, spellSchool, spellTime, spellRange, spellComp, spellConc, spellDesc, entryInfo];
+
+        entryInfo.forEach(function(entry) {currentSpell.append(entry)});
+
+      // Function for displaying spell data
+      function renderButton(title) {
+        buttonsArr.push($("<button>").text(title).addClass("spell-button"));
+
+        buttonsView.empty();
+        buttonsArr.forEach(function(t) {buttonsView.append(t)});
+      }
+
+      // This function handles events where one button is clicked
+      $("#add-spell").on("click", function() {
+        event.preventDefault();
+
+        var newSpell = spellInput.val().trim();
+
+        renderButton(newSpell);
+        spellInput.text("");
+      });
+
+      // Calling the renderButtons function to display the initial list of movies
+      sampleSpells.forEach(renderButton);
+
+      $("#buttons-view").on("click", ".spell-button", function (event) {
+        currentClick = event.currentTarget.firstChild.data;
+
+        var queryURL = proxyURL + "http://dnd5eapi.co/api/spells/?name=" + currentClick;
+        $.ajax({
+          url: queryURL,
+          method: "GET"
+        }).then(getSpellInfo);
+      });
+
+        function getSpellInfo(response) {
+        
+            var spellURL = proxyURL + response.results[0].url;
+            $.ajax({
+                url: spellURL,
+                method: "GET"
+            }).then(addSpellInfo);
+        }
+
+      function addSpellInfo(response) {    
+        spellName.text("Name: " + response.name);
+        spellLevel.text("Level: " + response.level);
+        spellSchool.text("School" + response.school.name);
+        spellTime.text("Casting Time: " + response.casting_time);
+        spellRange.text("Range: " + response.range);
+        spellComp.text("Components: " + response.components);
+        spellConc.text("Concentration: " + response.concentration);
+        spellDesc.text("Description: " + response.desc);
+      }
+
+    </script>
+  </div>
+</body>
+
+</html>
